@@ -29,4 +29,4 @@ Bash script:
 > [!NOTE]
 > Big thanks to the GNU/Linux, [KiCad](https://www.kicad.org) and plugins communities. :heart:
 
-Happy bashing, schemating, routing, soldering & have fun ! :partying_face:
+Happy commanding, schematicing, routing, soldering & have fun ! :partying_face:
