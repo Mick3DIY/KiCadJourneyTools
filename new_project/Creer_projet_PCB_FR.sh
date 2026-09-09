@@ -9,6 +9,14 @@
 # ├── Code
 # ├── FreeCad
 # ├── GitHub
+# │   ├── assets
+# │   ├── code
+# │   ├── freecad
+# │   ├── kicad
+# │   ├── CHANGELOG.md
+# │   ├── LICENSE
+# │   ├── README.md
+# │   ├── .gitignore
 # ├── Images
 # │   ├── Schémas
 # │   └── Vues3D
@@ -25,12 +33,18 @@
 DATE_PREFIX=$(date +%Y-%m_)
 # Dossier KiCad
 KICAD_FOLDER="KiCad"
-# Sous-dossiers, à modifier selon vos besoins
-SUB_DIRS=("Code" "FreeCad" "GitHub" "Images" "${KICAD_FOLDER}")
+# Dossier GitHub
+GITHUB_FOLDER="GitHub"
+# Fichiers à créer dans le dossier GitHub
+GITHUB_FILES=("CHANGELOG.md" "LICENSE" "README.md" ".gitignore")
+# Sous-dossiers locaux, à modifier selon vos besoins
+SUB_DIRS=("Code" "FreeCad" "${GITHUB_FOLDER}" "Images" "${KICAD_FOLDER}")
 # Sous-dossiers Images
 SUB_DIRS_IMAGES=("Schémas" "Vues3D")
 # Sous-dossiers KiCad
 SUB_DIRS_KICAD=("Datasheets" "Libraries/3DModels" "Libraries/Footprints" "Libraries/Symbols")
+# Sous-dossiers GitHub
+SUB_DIRS_GITHUB=("assets" "code" "freecad" "kicad")
 # Fichier documentation du projet
 README_FILE="Lisezmoi.txt"
 # Dépôt de AISLER pour les paramètres du nouveau projet
@@ -62,19 +76,33 @@ echo "Création des sous-dossiers dans $main_dir..."
 for dir in "${SUB_DIRS[@]}"; do
     mkdir -p "$main_dir/$dir" || { echo "Erreur lors de la création du sous-dossier $dir."; exit 1; }
     echo " - Dossier créé : $dir"
+	error_folders="Erreur lors de la création du sous-dossier $ssdir."
+	error_files="Erreur lors de la création du fichier $ssfiles."
 	# Création des sous-dossiers pour Images
 	if [ "$dir" = "Images" ]; then
 		for ssdir in "${SUB_DIRS_IMAGES[@]}"; do
-    		mkdir -p "$main_dir/$dir/$ssdir" || { echo "Erreur lors de la création du sous-dossier Images $ssdir."; exit 1; }
+    		mkdir -p "$main_dir/$dir/$ssdir" || { echo $error_folders; exit 1; }
     		echo "   ⤷ Sous-dossier créé : $ssdir"
     	done
 	fi
     # Création des sous-dossiers pour KiCad
     if [ "$dir" = "${KICAD_FOLDER}" ]; then
     	for ssdir in "${SUB_DIRS_KICAD[@]}"; do
-    		mkdir -p "$main_dir/$dir/$ssdir" || { echo "Erreur lors de la création du sous-dossier KiCad $ssdir."; exit 1; }
+    		mkdir -p "$main_dir/$dir/$ssdir" || { echo $error_folders; exit 1; }
     		echo "   ⤷ Sous-dossier créé : $ssdir"
     	done
+	fi
+	# Création des sous-dossiers pour GitHub
+	if [ "$dir" = "${GITHUB_FOLDER}" ]; then
+    	for ssdir in "${SUB_DIRS_GITHUB[@]}"; do
+    		mkdir -p "$main_dir/$dir/$ssdir" || { echo $error_folders; exit 1; }
+    		echo "   ⤷ Sous-dossier créé : $ssdir"
+    	done
+		# Fichiers à créer dans le dossier racine
+		for ssfiles in "${GITHUB_FILES[@]}"; do
+			touch $main_dir/$dir/$ssfiles || { echo $error_files; exit 1; }
+			echo "   ⤷ Fichier créé : $ssfiles"
+		done
 	fi
 done
 
