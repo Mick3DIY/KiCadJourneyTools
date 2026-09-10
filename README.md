@@ -26,6 +26,7 @@ KiCad manufacturers support repositories :
 Bash script:
 * https://www.gnu.org/software/bash/
 * https://www.gnu.org/software/bash/manual/
+* https://linuxcommand.org from William Shotts :penguin: :pray:
 * https://itsfoss.com/bash-scripting-tutorial/ [beginners]
 
 
