@@ -20,6 +20,9 @@ KiCad :
 * https://www.kicad.org
 * https://docs.kicad.org
 
+KiCad manufacturers support repositories :
+* https://github.com/AislerHQ/aisler-support
+
 Bash script:
 * https://www.gnu.org/software/bash/
 * https://www.gnu.org/software/bash/manual/

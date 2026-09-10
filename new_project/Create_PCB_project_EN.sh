@@ -29,6 +29,8 @@
 # │   └── master.zip -> AISLER archive to extract
 # └── README.txt
 # ----------------------------------------------
+# Checks Bash (strict mode)
+set -euo pipefail
 # Main folder, adding date prefix in format: YYYY-MM_ (Example: 2026-09_)
 DATE_PREFIX=$(date +%Y-%m_)
 # KiCad folder
@@ -52,7 +54,7 @@ AISLER_SUPPORT_ZIP="https://github.com/AislerHQ/aisler-support/archive/refs/head
 
 clear
 # No project name provided as argument
-if [[ "$1" == "" ]]; then
+if [[ "${1:-}" == "" ]]; then
 	read -r -p "Please enter the project name ('${DATE_PREFIX}' prefix will be added) : " project_name
 	if [[ -z "$project_name" ]]; then
 		echo "Error: No project name entered."; exit 1;
@@ -74,8 +76,8 @@ echo "Creating subdirectories in $main_dir..."
 for dir in "${SUB_DIRS[@]}"; do
     mkdir -p "$main_dir/$dir" || { echo "Error creating subdirectory $dir."; exit 1; }
     echo " - Directory created: $dir"
-	error_folders="Error creating the subdirectory $ssdir."
-	error_files="Error creating the file $ssfiles."
+	error_folders="Error creating the subdirectory ${ssdir:-}."
+	error_files="Error creating the file ${ssfiles:-}."
 	# Create Images subdirectories
 	if [ "$dir" = "Images" ]; then
 		for ssdir in "${SUB_DIRS_IMAGES[@]}"; do
@@ -105,15 +107,28 @@ for dir in "${SUB_DIRS[@]}"; do
 done
 
 # Project documentation file, customize as needed
-readme_file="$main_dir/${README_FILE}"
+readme_url="$main_dir/${README_FILE}"
 echo ""
-echo "Creating and writing to file $readme_file"
-echo "Project description" > "$readme_file" || { echo "Error creating or writing to ${README_FILE}."; exit 1; }
+echo "Creating and writing to file $readme_url"
+echo "Project description" > "$readme_url" || { echo "Error creating or writing to ${README_FILE}."; exit 1; }
 echo ""
 
 # AISLER Support to KiCad folder, customize as needed
-echo "Downloading AISLER archive..."
-echo ""
-wget -q ${AISLER_SUPPORT_ZIP} -P "$main_dir/${KICAD_FOLDER}" || { echo "Error downloading AISLER archive."; exit 1; }
-echo "AISLER archive created in directory $main_dir/${KICAD_FOLDER}"
-echo ""
+download_aisler_archive() {
+	echo "Downloading AISLER archive..."
+	echo ""
+	archive_name="aisler-support.zip"
+	archive_folder="$main_dir/${KICAD_FOLDER}"
+	# Downloading from curl ou wget ?
+	if command -v curl &> /dev/null; then
+    	curl -sL "${AISLER_SUPPORT_ZIP}" -o "${archive_folder}/${archive_name}"
+	elif command -v wget &> /dev/null; then
+    	wget -q "${AISLER_SUPPORT_ZIP}" -O "${archive_folder}/${archive_name}"
+	else
+    	echo "Error downloading the archive with curl/wget." >&2
+	fi
+	echo ""
+	return
+}
+# Download the archive
+download_aisler_archive

@@ -29,6 +29,8 @@
 # │   └── master.zip -> Archive AISLER à décompresser
 # └── Lisezmoi.txt
 # ----------------------------------------------
+# Vérifications Bash (mode strict)
+set -euo pipefail
 # Dossier principal, ajout de la date au format : AAAA-MM_ (Exemple : 2026-09_)
 DATE_PREFIX=$(date +%Y-%m_)
 # Dossier KiCad
@@ -52,7 +54,7 @@ AISLER_SUPPORT_ZIP="https://github.com/AislerHQ/aisler-support/archive/refs/head
 
 clear
 # Aucun nom de projet en argument
-if [[ "$1" == "" ]]; then
+if [[ "${1:-}" == "" ]]; then
 	read -r -p "Veuillez saisir le nom du projet (le préfixe '${DATE_PREFIX}' sera ajouté) : " project_name
 	if [[ -z "$project_name" ]]; then
 		echo "Erreur : Aucun nom de projet saisi."; exit 1;
@@ -74,8 +76,8 @@ echo "Création des sous-dossiers dans $main_dir..."
 for dir in "${SUB_DIRS[@]}"; do
     mkdir -p "$main_dir/$dir" || { echo "Erreur lors de la création du sous-dossier $dir."; exit 1; }
     echo " - Dossier créé : $dir"
-	error_folders="Erreur lors de la création du sous-dossier $ssdir."
-	error_files="Erreur lors de la création du fichier $ssfiles."
+	error_folders="Erreur lors de la création du sous-dossier ${ssdir:-}."
+	error_files="Erreur lors de la création du fichier ${ssfiles:-}."
 	# Création des sous-dossiers pour Images
 	if [ "$dir" = "Images" ]; then
 		for ssdir in "${SUB_DIRS_IMAGES[@]}"; do
@@ -105,15 +107,28 @@ for dir in "${SUB_DIRS[@]}"; do
 done
 
 # Fichier documentation du projet, à modifier selon vos besoins
-readme_file="$main_dir/${README_FILE}"
+readme_url="$main_dir/${README_FILE}"
 echo ""
-echo "Création et écriture dans le fichier $readme_file"
-echo "Description du projet" > "$readme_file" || { echo "Erreur lors de la création ou de l'écriture dans ${README_FILE}."; exit 1; }
+echo "Création et écriture dans le fichier $readme_url"
+echo "Description du projet" > "$readme_url" || { echo "Erreur lors de la création ou de l'écriture dans ${README_FILE}."; exit 1; }
 echo ""
 
 # AISLER Support vers le dossier KiCad, à modifier selon vos besoins
-echo "Téléchargement de l'archive AISLER..."
-echo ""
-wget -q ${AISLER_SUPPORT_ZIP} -P "$main_dir/${KICAD_FOLDER}" || { echo "Erreur lors du téléchargement de l'archive AISLER."; exit 1; }
-echo "Archive AISLER créée dans le dossier $main_dir/${KICAD_FOLDER}"
-echo ""
+download_aisler_archive() {
+	echo "Téléchargement de l'archive AISLER..."
+	echo ""
+	archive_name="aisler-support.zip"
+	archive_folder="$main_dir/${KICAD_FOLDER}"
+	# Téléchargement via curl ou wget ?
+	if command -v curl &> /dev/null; then
+    	curl -sL "${AISLER_SUPPORT_ZIP}" -o "${archive_folder}/${archive_name}"
+	elif command -v wget &> /dev/null; then
+    	wget -q "${AISLER_SUPPORT_ZIP}" -O "${archive_folder}/${archive_name}"
+	else
+    	echo "Erreur lors du téléchargement via curl/wget de l'archive." >&2
+	fi
+	echo ""
+	return
+}
+# Téléchargement de l'archive
+download_aisler_archive
