@@ -53,14 +53,12 @@ AISLER_SUPPORT_ZIP="https://github.com/AislerHQ/aisler-support/archive/refs/head
 clear
 # Aucun nom de projet en argument
 if [[ "$1" == "" ]]; then
-	echo "Veuillez saisir le nom du projet (le préfixe '${DATE_PREFIX}' sera ajouté) :"
-	read -r project_name
-	if [ -z "$project_name" ]; then
-		echo "Erreur : Aucun nom de projet saisi."
-		exit 1
+	read -r -p "Veuillez saisir le nom du projet (le préfixe '${DATE_PREFIX}' sera ajouté) : " project_name
+	if [[ -z "$project_name" ]]; then
+		echo "Erreur : Aucun nom de projet saisi."; exit 1;
 	fi
 else
-	project_name=$1
+	project_name="$1"
 fi
 
 # Dossier principal du projet
