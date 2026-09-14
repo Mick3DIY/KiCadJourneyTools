@@ -12,7 +12,8 @@ A simple repository with scripts, codes than I'm using everyday and to wish you 
 
 ## TODO :
 
-- [ ] [code] Add more scripts and codes :laughing:
+- [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
+- [ ] [code] Add more scripts and codes, any ideas ? :laughing:
 
 ## Documentation :
 

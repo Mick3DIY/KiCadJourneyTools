@@ -50,6 +50,7 @@ declare -A MSG_FR MSG_EN
 MSG_FR[prompt_name]="Saisir le nom du nouveau projet (le préfixe '%s' sera ajouté) : "
 MSG_FR[err_no_name]="Erreur : Aucun nom de projet fourni."
 MSG_FR[create_tree]="Création de l'arborescence du projet : %s"
+MSG_FR[create_success]="L'arborescence du projet a été créé avec succès dans : %s"
 MSG_FR[created_dir]="Dossier créé : %s"
 MSG_FR[created_sdir]=" ⤷ Sous-dossier créé : %s"
 MSG_FR[created_file]=" ⤷ Fichier créé : %s"
@@ -59,6 +60,7 @@ MSG_FR[download_error]="Erreur : Lors du téléchargement du fichier %s via curl
 MSG_EN[prompt_name]="Enter new project name (prefix '%s' will be added) : "
 MSG_EN[err_no_name]="Error : No project name provided."
 MSG_EN[create_tree]="Creating main project directory : %s"
+MSG_EN[create_success]="Project directories created successfully at : %s"
 MSG_EN[created_dir]="Directory created : %s"
 MSG_EN[created_sdir]=" ⤷ Subdirectory created : %s"
 MSG_EN[created_file]=" ⤷ File created : %s"
@@ -81,16 +83,16 @@ trans() {
 DATE_PREFIX=$(date +%Y-%m_)
 # KiCad folder
 KICAD_FOLDER="KiCad"
-# GitHub folder
-GITHUB_FOLDER="GitHub"
-# Files to create in GitHub folder
-GITHUB_FILES=("CHANGELOG.md" "LICENSE" "README.md" ".gitignore")
 # Subdirectories, customize as needed
 SUB_DIRS=("Code" "FreeCad" "GitHub" "Images" "${KICAD_FOLDER}")
 # Images subdirectories
 SUB_DIRS_IMAGES=("Schematics" "3DViews")
 # KiCad subdirectories
 SUB_DIRS_KICAD=("Datasheets" "Libraries/3DModels" "Libraries/Footprints" "Libraries/Symbols")
+# GitHub folder
+GITHUB_FOLDER="GitHub"
+# Files to create in GitHub folder
+GITHUB_FILES=("CHANGELOG.md" "LICENSE" "README.md" ".gitignore")
 # GitHub subdirectories, customize as needed
 SUB_DIRS_GITHUB=("assets" "code" "freecad" "kicad")
 # Project TODO file
@@ -102,7 +104,7 @@ AISLER_SUPPORT_ZIP="aisler-support.zip"
 # Global functions
 # ---------------------------------------------------------
 get_project_name() {
-    project_name="${1:-}"
+    local project_name="${1:-}"
     if [[ -z "$project_name" ]]; then
         read -r -p "$(trans prompt_name "$DATE_PREFIX")" project_name
         if [[ -z "$project_name" ]]; then
@@ -113,7 +115,7 @@ get_project_name() {
 }
 
 create_subdirectories() {
-    project_dir="$1"
+    local project_dir="$1"
     # Main project folder
     echo "$(trans create_tree "$project_dir")"
     mkdir -p "$project_dir"
@@ -152,19 +154,19 @@ create_subdirectories() {
 }
 
 create_file() {
-    project_dir="$1"
-    file="$2"
+    local project_dir="$1"
+    local file="$2"
     # File to create
     touch "${project_dir}/${file}"
-    message="$(trans created_file "${file}")"
+    local message="$(trans created_file "${file}")"
     echo ${message:3} # Cut the firt 3 characters ;)
 }
 
 download_archive() {
-    project_dir="$1"
-    archive_url="$2"
-    archive_name="$3"
-    archive_folder="$project_dir/${KICAD_FOLDER}"
+    local project_dir="$1"
+    local archive_url="$2"
+    local archive_name="$3"
+    local archive_folder="$project_dir/${KICAD_FOLDER}"
 	echo "$(trans download_file "$archive_url")"
 	# Downloading from curl ou wget ?
 	if command -v curl &> /dev/null; then
@@ -186,3 +188,5 @@ create_subdirectories "${main_dir}"
 create_file "${main_dir}" "${TODO_FILE}"
 # AISLER archive (optional)
 download_archive "${main_dir}" "${AISLER_SUPPORT_URL}" "${AISLER_SUPPORT_ZIP}"
+# Success ! ^^
+echo "$(trans create_success "$main_dir")"
