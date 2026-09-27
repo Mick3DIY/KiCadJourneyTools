@@ -8,7 +8,8 @@ A simple repository with scripts, codes, tips than I'm using everyday and to wis
 
 ## Code :
 
-* For new KiCad project, Bash scripts : [new_project](new_project/) folder
+* For new project, Bash scripts : [new_project](new_project/) folder
+* To manage project, Bash scripts : [manage_project](manage_project/) folder **Work In Progress !**
 
 ## Text variables :
 
@@ -18,19 +19,20 @@ To not re-enter these variables in each new project, you can add this JSON code 
 
 ```json
 "text_variables": {
-    "PROJECT_TITLE": "YOUR_PROJECT_NAME",
-    "PROJECT_LINK": "Your project : https://your-project-url",
-    "PCB_VERSION": "V1.0",
-    "SCHEMATIC_VERSION": "V1.0",
+    "PROJECT_TITLE": "Your project name",
+    "PROJECT_LINK": "Your project link : https://your-project-url",
+    "PCB_VERSION": "V1.0.0",
+    "SCHEMATIC_VERSION": "V1.0.0",
     "YOUR_VARIABLE_NAME": "Your text, component reference, link"
 }
 ```
 After that, just add any variable names in your schematic or PCB (texts, symbols, drawing sheet zones...) with a specific call  `${PROJECT_TITLE}` for the project name.
 
-More informations : https://docs.kicad.org/9.0/en/eeschema/eeschema.html#text-variables
+More informations : https://docs.kicad.org/master/en/eeschema/eeschema.html#variant-text-variables
 
 ## TODO :
 
+- [ ] [code] Add script for managing KiCad project with a normal workflow : step1, step2...
 - [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
 - [ ] [code] Add more scripts and codes, any ideas ? :laughing:
 
@@ -44,10 +46,14 @@ KiCad :
 KiCad manufacturers support repositories :
 * https://github.com/AislerHQ/aisler-support
 
-Bash script:
+KiCad books :
+* Elektor Ebooks bundle "KiCad Like a Pro" : https://www.elektor.fr/products/kicad-like-a-pro-e-book-bundle from [Peter Dalmaris](https://github.com/futureshocked) :ok_hand:
+
+Bash script :
 * https://www.gnu.org/software/bash/
 * https://www.gnu.org/software/bash/manual/
 * https://linuxcommand.org from William Shotts :penguin: :pray:
+* https://github.com/bobbyiliev/introduction-to-bash-scripting :ok_hand:
 * https://itsfoss.com/bash-scripting-tutorial/ [beginners]
 
 
