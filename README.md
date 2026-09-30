@@ -4,7 +4,7 @@
 
 # Our journey with KiCad
 
-A simple repository with scripts, codes, tips than I'm using everyday and to wish you a pleasant journey with KiCad.
+A simple repository with scripts, codes and tips that I'm using every day, to wish you a pleasant journey with KiCad, for your studies or hobbies.
 
 ## Code :
 

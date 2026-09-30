@@ -159,7 +159,7 @@ create_file() {
     # File to create
     touch "${project_dir}/${file}"
     local message="$(trans created_file "${file}")"
-    echo ${message:3} # Cut the firt 3 characters ;)
+    echo "${message:3}" # Cut the firt 3 characters ;)
 }
 
 download_archive() {
