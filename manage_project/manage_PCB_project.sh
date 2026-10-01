@@ -89,6 +89,9 @@ CLI_PCB_DRC="kicad-cli pcb drc --schematic-parity --severity-all --output ${CLI_
 CLI_PCB_STEP_FILE="3d-model.step"
 CLI_PCB_STEP_FILE_URI="${EXPORT_FOLDER}/${CLI_PCB_STEP_FILE}"
 CLI_PCB_STEP="kicad-cli pcb export step --no-dnp --output ${CLI_PCB_STEP_FILE_URI}"
+CLI_PCB_PDF_FILE="pcb.pdf"
+CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER}/${CLI_PCB_PDF_FILE}"
+CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI}"
 # ---------------------------------------------------------
 # Global functions
 # ---------------------------------------------------------
@@ -97,17 +100,20 @@ get_project_name() {
     if [[ -z "$project_name" ]]; then
         echo -e "${RED}$(trans err_no_name) $(trans usage)${RESET}" >&2; exit 1;
     fi
-    echo "${project_name// /_}" # Return value
+    echo "${project_name// /_}" # Return value for the CLI commands
 }
 
-check_schematic_erc() {
-    local cli_sch_erc="$1"
-    if $cli_sch_erc; then
-        echo "$(trans erc_pass)"
+check_schematic_pcb() {
+    local cli_check="$1"
+    local uri_file="$2"
+    local message_pass="$3"
+    local message_failed="$4"
+    if $cli_check; then
+        echo "$(trans $message_pass)"
     else
-        echo -e "${RED}$(trans erc_failed)${RESET}"
-        if [ -f "$CLI_SCH_ERC_REPORT_URI" ]; then
-            cat "${CLI_SCH_ERC_REPORT_URI}"
+        echo -e "${RED}$(trans $message_failed)${RESET}"
+        if [ -f "$uri_file" ]; then
+            cat "${uri_file}"
         fi
         exit 1
     fi
@@ -129,19 +135,6 @@ export_schematic_pdf() {
         echo "$(trans pdf_pass)"
     else
         echo -e "${RED}$(trans pdf_failed)${RESET}"
-        exit 1
-    fi
-}
-
-check_pcb_drc() {
-    local cli_pcb_drc="$1"
-    if $cli_pcb_drc; then
-        echo "$(trans drc_pass)"
-    else
-        echo -e "${RED}$(trans drc_failed)${RESET}"
-        if [ -f "$CLI_PCB_DRC_REPORT_URI" ]; then
-            cat "${CLI_PCB_DRC_REPORT_URI}"
-        fi
         exit 1
     fi
 }
@@ -168,7 +161,7 @@ if [[ -n "$project_name" ]]; then
     # Project name (schematic)
     project_file="${project_name}.kicad_sch"
     # Check the ERC on the schematic
-    check_schematic_erc "${CLI_SCH_ERC} ${project_file}"
+    check_schematic_pcb "${CLI_SCH_ERC} ${project_file}" "${CLI_SCH_ERC_REPORT_URI}" "erc_pass" "erc_failed"
     # Export the BOM to a CSV file
     export_schematic_bom "${CLI_SCH_BOM} ${project_file}"
     # Export the schematic to a PDF file
@@ -176,7 +169,9 @@ if [[ -n "$project_name" ]]; then
     # Project name (PCB)
     project_file="${project_name}.kicad_pcb"
     # Check the DRC on the PCB
-    check_pcb_drc "${CLI_PCB_DRC} ${project_file}"
+    check_schematic_pcb "${CLI_PCB_DRC} ${project_file}" "${CLI_PCB_DRC_REPORT_URI}" "drc_pass" "drc_failed"
     # Export the board to a 3D step file
     export_pcb_step "${CLI_PCB_STEP} ${project_file}"
+    # Export the PCB to a PDF file
+    export_schematic_pdf "${CLI_PCB_PDF} ${project_file}"
 fi

@@ -15,7 +15,7 @@ A simple repository with scripts, codes and tips that I'm using every day, to wi
 
 :bulb: In KiCad, you can define common global variables for the schematic/PCB drawing sheets. 
 
-To not re-enter these variables in each new project, you can add this JSON code in the `.kicad_pro` file, in the section `text_variables` :
+To not re-enter these text variables in each new project, you can add this JSON code in the `.kicad_pro` file, in the section `text_variables` (don't forget to close all KiCad windows before) :
 
 ```json
 "text_variables": {
@@ -27,6 +27,10 @@ To not re-enter these variables in each new project, you can add this JSON code 
 }
 ```
 After that, just add any variable names in your schematic or PCB (texts, symbols, drawing sheet zones...) with a specific call  `${PROJECT_TITLE}` for the project name.
+
+Otherwise if you have these text variables in one of your project, you can import it directly from KiCad :
+* From the schematic or board setup window, select the button 'Import settings from another project' or 'Import settings from another board'
+* Select 'Text variables' in the options list
 
 More informations : https://docs.kicad.org/master/en/eeschema/eeschema.html#variant-text-variables
 
