@@ -54,6 +54,7 @@ MSG_EN[drc_failed]="Error : DRC tests has failed !"
 MSG_EN[step_pass]="3D step file created successfully"
 MSG_EN[step_failed]="Error : During created 3D step file !"
 # Colors for messages
+GREEN='\e[32m'
 RED='\e[0;31m'
 RESET='\e[0m'
 # Translation helper
@@ -72,26 +73,27 @@ trans() {
 # Export folder, adding date prefix in format: YYYY-mm-dd_s (Example: 2026-09-28_UnixTimeStamp_Export)
 DATE_PREFIX=$(date +%Y-%m-%d_%s)
 EXPORT_FOLDER="${DATE_PREFIX}_Export"
-# KiCad CLI schematic commands :
+# KiCad CLI schematic commands
 CLI_SCH_ERC_REPORT="erc-report.rpt"
 CLI_SCH_ERC_REPORT_URI="${EXPORT_FOLDER}/${CLI_SCH_ERC_REPORT}"
-CLI_SCH_ERC="kicad-cli sch erc --severity-error --output ${CLI_SCH_ERC_REPORT_URI} --exit-code-violations"
+CLI_SCH_ERC="kicad-cli sch erc --output ${CLI_SCH_ERC_REPORT_URI} --severity-error --exit-code-violations"
 CLI_SCH_BOM_FILE="bom.csv"
 CLI_SCH_BOM_FILE_URI="${EXPORT_FOLDER}/${CLI_SCH_BOM_FILE}"
-CLI_SCH_BOM="kicad-cli sch export bom --exclude-dnp --group-by "Value,Footprint" --output ${CLI_SCH_BOM_FILE_URI}"
+CLI_SCH_BOM="kicad-cli sch export bom --output ${CLI_SCH_BOM_FILE_URI} --exclude-dnp --group-by "Value,Footprint""
 CLI_SCH_PDF_FILE="schematic.pdf"
 CLI_SCH_PDF_FILE_URI="${EXPORT_FOLDER}/${CLI_SCH_PDF_FILE}"
 CLI_SCH_PDF="kicad-cli sch export pdf --output ${CLI_SCH_PDF_FILE_URI}"
-# KiCad CLI PCB commands :
+# KiCad CLI PCB commands
 CLI_PCB_DRC_REPORT="drc-report.rpt"
 CLI_PCB_DRC_REPORT_URI="${EXPORT_FOLDER}/${CLI_PCB_DRC_REPORT}"
-CLI_PCB_DRC="kicad-cli pcb drc --schematic-parity --severity-all --output ${CLI_PCB_DRC_REPORT_URI} --exit-code-violations"
+CLI_PCB_DRC="kicad-cli pcb drc --output ${CLI_PCB_DRC_REPORT_URI} --schematic-parity --severity-all --exit-code-violations"
 CLI_PCB_STEP_FILE="3d-model.step"
 CLI_PCB_STEP_FILE_URI="${EXPORT_FOLDER}/${CLI_PCB_STEP_FILE}"
-CLI_PCB_STEP="kicad-cli pcb export step --no-dnp --output ${CLI_PCB_STEP_FILE_URI}"
+CLI_PCB_STEP="kicad-cli pcb export step --output ${CLI_PCB_STEP_FILE_URI} --no-dnp"
 CLI_PCB_PDF_FILE="pcb.pdf"
 CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER}/${CLI_PCB_PDF_FILE}"
-CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI}"
+CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI} --layers F.Cu,F.Silkscreen,F.Courtyard,Edge.Cuts,User.Drawings \
+            --include-border-title --black-and-white"
 # ---------------------------------------------------------
 # Global functions
 # ---------------------------------------------------------
@@ -109,42 +111,24 @@ check_schematic_pcb() {
     local message_pass="$3"
     local message_failed="$4"
     if $cli_check; then
-        echo "$(trans $message_pass)"
+        echo -e "${GREEN}$(trans $message_pass)${RESET}"
     else
         echo -e "${RED}$(trans $message_failed)${RESET}"
         if [ -f "$uri_file" ]; then
-            cat "${uri_file}"
+            cat "${uri_file}" # Show the report file
         fi
         exit 1
     fi
 }
 
-export_schematic_bom() {
-    local cli_sch_bom="$1"
-    if $cli_sch_bom; then
-        echo "$(trans bom_pass)"
+export_files(){
+    local cli_export="$1"
+    local message_pass="$2"
+    local message_failed="$3"
+    if $cli_export; then
+        echo -e "${GREEN}$(trans $message_pass)${RESET}"
     else
-        echo -e "${RED}$(trans bom_failed)${RESET}"
-        exit 1
-    fi
-}
-
-export_schematic_pdf() {
-    local cli_sch_pdf="$1"
-    if $cli_sch_pdf; then
-        echo "$(trans pdf_pass)"
-    else
-        echo -e "${RED}$(trans pdf_failed)${RESET}"
-        exit 1
-    fi
-}
-
-export_pcb_step() {
-    local cli_pcb_step="$1"
-    if $cli_pcb_step; then
-        echo "$(trans step_pass)"
-    else
-        echo -e "${RED}$(trans step_failed)${RESET}"
+        echo -e "${RED}$(trans $message_failed)${RESET}"
         exit 1
     fi
 }
@@ -157,21 +141,21 @@ if [[ -n "$project_name" ]]; then
     # Main report folder
     main_dir=${EXPORT_FOLDER}
     mkdir -p "$main_dir"
-    echo "$(trans created_dir "$main_dir")"
+    echo -e "${GREEN}$(trans created_dir "$main_dir")${RESET}"
     # Project name (schematic)
     project_file="${project_name}.kicad_sch"
     # Check the ERC on the schematic
     check_schematic_pcb "${CLI_SCH_ERC} ${project_file}" "${CLI_SCH_ERC_REPORT_URI}" "erc_pass" "erc_failed"
     # Export the BOM to a CSV file
-    export_schematic_bom "${CLI_SCH_BOM} ${project_file}"
+    export_files "${CLI_SCH_BOM} ${project_file}" "bom_pass" "bom_failed"
     # Export the schematic to a PDF file
-    export_schematic_pdf "${CLI_SCH_PDF} ${project_file}"
+    export_files "${CLI_SCH_PDF} ${project_file}" "pdf_pass" "pdf_failed"
     # Project name (PCB)
     project_file="${project_name}.kicad_pcb"
     # Check the DRC on the PCB
     check_schematic_pcb "${CLI_PCB_DRC} ${project_file}" "${CLI_PCB_DRC_REPORT_URI}" "drc_pass" "drc_failed"
     # Export the board to a 3D step file
-    export_pcb_step "${CLI_PCB_STEP} ${project_file}"
+    export_files "${CLI_PCB_STEP} ${project_file}" "step_pass" "step_failed"
     # Export the PCB to a PDF file
-    export_schematic_pdf "${CLI_PCB_PDF} ${project_file}"
+    export_files "${CLI_PCB_PDF} ${project_file}" "pdf_pass" "pdf_failed"
 fi
