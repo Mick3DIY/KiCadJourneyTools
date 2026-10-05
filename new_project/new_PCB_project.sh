@@ -79,6 +79,10 @@ trans() {
 # ---------------------------------------------------------
 # Global constants
 # ---------------------------------------------------------
+# ANSI colors for messages : https://en.wikipedia.org/wiki/ANSI_escape_code
+GREEN='\e[32m'
+RED='\e[0;31m'
+RESET='\e[0m'
 # Main folder, adding date prefix in format: YYYY-MM_ (Example: 2026-09_)
 DATE_PREFIX=$(date +%Y-%m_)
 # KiCad folder
@@ -108,10 +112,10 @@ get_project_name() {
     if [[ -z "$project_name" ]]; then
         read -r -p "$(trans prompt_name "$DATE_PREFIX")" project_name
         if [[ -z "$project_name" ]]; then
-            echo "$(trans err_no_name)" >&2; exit 1;
+            echo -e "${RED}$(trans err_no_name)${RESET}" >&2; exit 1;
         fi
     fi
-    echo "${project_name// /_}" # Return value
+    echo "${project_name// /_}" # Return value for the CLI commands
 }
 
 create_subdirectories() {
@@ -122,19 +126,19 @@ create_subdirectories() {
     # Main loop for subdirectories
     for dir in "${SUB_DIRS[@]}"; do
         mkdir -p "$project_dir/$dir"
-        echo "$(trans created_dir "$dir")"
+        echo -e "${GREEN}$(trans created_dir "$dir")${RESET}"
         # Create Images subdirectories
         if [ "$dir" = "Images" ]; then
             for ssdir in "${SUB_DIRS_IMAGES[@]}"; do
                 mkdir -p "$project_dir/$dir/$ssdir"
-                echo "$(trans created_sdir "$ssdir")"
+                echo -e "${GREEN}$(trans created_sdir "$ssdir")${RESET}"
             done
         fi
         # Create KiCad subdirectories
         if [ "$dir" = "${KICAD_FOLDER}" ]; then
             for ssdir in "${SUB_DIRS_KICAD[@]}"; do
                 mkdir -p "$main_dir/$dir/$ssdir"
-                echo "$(trans created_sdir "$ssdir")"
+                echo -e "${GREEN}$(trans created_sdir "$ssdir")${RESET}"
             done
 	    fi
         # Create GitHub subdirectories
@@ -142,12 +146,12 @@ create_subdirectories() {
             # Folders to create
             for ssdir in "${SUB_DIRS_GITHUB[@]}"; do
                 mkdir -p "$main_dir/$dir/$ssdir"
-                echo "$(trans created_sdir "$ssdir")"
+                echo -e "${GREEN}$(trans created_sdir "$ssdir")${RESET}"
             done
             # Files to create
             for ssfiles in "${GITHUB_FILES[@]}"; do
                 touch $main_dir/$dir/$ssfiles
-                echo "$(trans created_file "$ssfiles")"
+                echo -e "${GREEN}$(trans created_file "$ssfiles")${RESET}"
             done
 	    fi
     done
@@ -159,7 +163,7 @@ create_file() {
     # File to create
     touch "${project_dir}/${file}"
     local message="$(trans created_file "${file}")"
-    echo "${message:3}" # Cut the firt 3 characters ;)
+    echo -e "${GREEN}${message:3}${RESET}" # Cut the firt 3 characters ;)
 }
 
 download_archive() {
@@ -174,7 +178,7 @@ download_archive() {
 	elif command -v wget &> /dev/null; then
     	wget -q "${archive_url}" -O "${archive_folder}/${archive_name}"
 	else
-    	echo "$(trans download_error "$archive_url")"
+    	echo -e "${RED}$(trans download_error "$archive_url")${RESET}"
 	fi
 }
 # ---------------------------------------------------------
@@ -189,4 +193,4 @@ create_file "${main_dir}" "${TODO_FILE}"
 # AISLER archive (optional)
 download_archive "${main_dir}" "${AISLER_SUPPORT_URL}" "${AISLER_SUPPORT_ZIP}"
 # Success ! ^^
-echo "$(trans create_success "$main_dir")"
+echo -e "${GREEN}$(trans create_success "$main_dir")${RESET}"

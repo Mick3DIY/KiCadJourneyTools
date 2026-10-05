@@ -9,7 +9,7 @@ A simple repository with scripts, codes and tips that I'm using every day, to wi
 ## Code :
 
 * For new project, Bash scripts : [new_project](new_project/) folder
-* To manage project, Bash scripts : [manage_project](manage_project/) folder (**Work In Progress**)
+* To manage project, Bash scripts : [manage_project](manage_project/) folder
 
 ## Text variables :
 
@@ -36,7 +36,7 @@ More informations : https://docs.kicad.org/master/en/eeschema/eeschema.html#vari
 
 ## TODO :
 
-- [ ] [code] Add script for managing KiCad project with a normal workflow : schematic, PCB...
+- [x] [code] Add script for managing KiCad project with a normal workflow : schematic, PCB...
 - [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
 - [ ] [code] Add more scripts and codes, any ideas ? :laughing:
 
