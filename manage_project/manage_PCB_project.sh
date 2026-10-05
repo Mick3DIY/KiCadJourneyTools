@@ -4,8 +4,10 @@
 # GitHub project : https://github.com/Mick3DIY/KiCadJourneyTools
 # -----------------------------------------------------------------------------
 # Usage :
-# - with your default language : ./manage_PCB_project.sh <project_name_with_URI>
-# - with a particular language : LANG=en ./manage_PCB_project.sh <project_name_with_URI>
+# - with your default language : ./manage_PCB_project.sh <path_to_your_project_name_with_complete_URI>
+# - with a particular language : LANG=en ./manage_PCB_project.sh <path_to_your_project_name_with_complete_URI>
+# Example :
+# ./manage_PCB_project.sh /YourHomeFolder/YourUserName/YourDocumentsFolder/YourProjectFolder/KiCad/YourProjectName (without file extension)
 # ---------------------------------------------------------
 # KiCad general workflow : Schematic ⟶ Printed Circuit Board (PCB) ⟶ Exports for fabrication
 # Schematic workflow : Electrical Rule Check (ERC) ⟶ export Bill Of Materials (BOM), print schematic in PDF
@@ -53,10 +55,6 @@ MSG_EN[drc_pass]="No error during DRC tests"
 MSG_EN[drc_failed]="Error : DRC tests has failed !"
 MSG_EN[step_pass]="3D step file created successfully"
 MSG_EN[step_failed]="Error : During created 3D step file !"
-# Colors for messages
-GREEN='\e[32m'
-RED='\e[0;31m'
-RESET='\e[0m'
 # Translation helper
 trans() {
     key="$1" # Message parameter
@@ -70,28 +68,27 @@ trans() {
 # ---------------------------------------------------------
 # Global constants
 # ---------------------------------------------------------
+# ANSI colors for messages : https://en.wikipedia.org/wiki/ANSI_escape_code
+GREEN='\e[32m'
+RED='\e[0;31m'
+RESET='\e[0m'
 # Export folder, adding date prefix in format: YYYY-mm-dd_s (Example: 2026-09-28_UnixTimeStamp_Export)
 DATE_PREFIX=$(date +%Y-%m-%d_%s)
 EXPORT_FOLDER="${DATE_PREFIX}_Export"
+EXPORT_FOLDER_ABSOLUTE="__VAR-TO-CHANGE__"
 # KiCad CLI schematic commands
-CLI_SCH_ERC_REPORT="erc-report.rpt"
-CLI_SCH_ERC_REPORT_URI="${EXPORT_FOLDER}/${CLI_SCH_ERC_REPORT}"
+CLI_SCH_ERC_REPORT_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/erc-report.rpt"
 CLI_SCH_ERC="kicad-cli sch erc --output ${CLI_SCH_ERC_REPORT_URI} --severity-error --exit-code-violations"
-CLI_SCH_BOM_FILE="bom.csv"
-CLI_SCH_BOM_FILE_URI="${EXPORT_FOLDER}/${CLI_SCH_BOM_FILE}"
+CLI_SCH_BOM_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/bom.csv"
 CLI_SCH_BOM="kicad-cli sch export bom --output ${CLI_SCH_BOM_FILE_URI} --exclude-dnp --group-by "Value,Footprint""
-CLI_SCH_PDF_FILE="schematic.pdf"
-CLI_SCH_PDF_FILE_URI="${EXPORT_FOLDER}/${CLI_SCH_PDF_FILE}"
+CLI_SCH_PDF_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/schematic.pdf"
 CLI_SCH_PDF="kicad-cli sch export pdf --output ${CLI_SCH_PDF_FILE_URI}"
 # KiCad CLI PCB commands
-CLI_PCB_DRC_REPORT="drc-report.rpt"
-CLI_PCB_DRC_REPORT_URI="${EXPORT_FOLDER}/${CLI_PCB_DRC_REPORT}"
+CLI_PCB_DRC_REPORT_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/drc-report.rpt"
 CLI_PCB_DRC="kicad-cli pcb drc --output ${CLI_PCB_DRC_REPORT_URI} --schematic-parity --severity-all --exit-code-violations"
-CLI_PCB_STEP_FILE="3d-model.step"
-CLI_PCB_STEP_FILE_URI="${EXPORT_FOLDER}/${CLI_PCB_STEP_FILE}"
+CLI_PCB_STEP_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/3d-model.step"
 CLI_PCB_STEP="kicad-cli pcb export step --output ${CLI_PCB_STEP_FILE_URI} --no-dnp"
-CLI_PCB_PDF_FILE="pcb.pdf"
-CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER}/${CLI_PCB_PDF_FILE}"
+CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/pcb.pdf"
 CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI} --layers F.Cu,F.Silkscreen,F.Courtyard,Edge.Cuts,User.Drawings \
             --include-border-title --black-and-white"
 # ---------------------------------------------------------
@@ -137,25 +134,33 @@ export_files(){
 # ---------------------------------------------------------
 clear
 project_name="$(get_project_name "${1:-}")"
-if [[ -n "$project_name" ]]; then
-    # Main report folder
-    main_dir=${EXPORT_FOLDER}
-    mkdir -p "$main_dir"
-    echo -e "${GREEN}$(trans created_dir "$main_dir")${RESET}"
-    # Project name (schematic)
-    project_file="${project_name}.kicad_sch"
-    # Check the ERC on the schematic
-    check_schematic_pcb "${CLI_SCH_ERC} ${project_file}" "${CLI_SCH_ERC_REPORT_URI}" "erc_pass" "erc_failed"
+# Absolute path to the project name
+absolute_path="$(dirname $(realpath $project_name))"
+if [[ -n "$project_name" && -d "$absolute_path" ]]; then
+    # Report folder to receive all files
+    report_dir="$absolute_path/${EXPORT_FOLDER}"
+    mkdir -p "$report_dir"
+    echo -e "${GREEN}$(trans created_dir "$report_dir")${RESET}"
+    # Schematic workflow :
+    project_file="${project_name}.kicad_sch"    
+    # Check the ERC
+    with_absolute_path="${CLI_SCH_ERC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    check_schematic_pcb "${with_absolute_path} ${project_file}" "${CLI_SCH_ERC_REPORT_URI}" "erc_pass" "erc_failed"
     # Export the BOM to a CSV file
-    export_files "${CLI_SCH_BOM} ${project_file}" "bom_pass" "bom_failed"
+    with_absolute_path="${CLI_SCH_BOM/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "bom_pass" "bom_failed"
     # Export the schematic to a PDF file
-    export_files "${CLI_SCH_PDF} ${project_file}" "pdf_pass" "pdf_failed"
-    # Project name (PCB)
+    with_absolute_path="${CLI_SCH_PDF/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "pdf_pass" "pdf_failed"
+    # PCB  workflow :
     project_file="${project_name}.kicad_pcb"
-    # Check the DRC on the PCB
-    check_schematic_pcb "${CLI_PCB_DRC} ${project_file}" "${CLI_PCB_DRC_REPORT_URI}" "drc_pass" "drc_failed"
+    # Check the DRC
+    with_absolute_path="${CLI_PCB_DRC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    check_schematic_pcb "${with_absolute_path} ${project_file}" "${CLI_PCB_DRC_REPORT_URI}" "drc_pass" "drc_failed"
     # Export the board to a 3D step file
-    export_files "${CLI_PCB_STEP} ${project_file}" "step_pass" "step_failed"
+    with_absolute_path="${CLI_PCB_STEP/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "step_pass" "step_failed"
     # Export the PCB to a PDF file
-    export_files "${CLI_PCB_PDF} ${project_file}" "pdf_pass" "pdf_failed"
+    with_absolute_path="${CLI_PCB_PDF/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "pdf_pass" "pdf_failed"
 fi
