@@ -7,11 +7,11 @@
 # - with your default language : ./manage_PCB_project.sh <path_to_your_project_name_with_complete_URI>
 # - with a particular language : LANG=en ./manage_PCB_project.sh <path_to_your_project_name_with_complete_URI>
 # Example :
-# ./manage_PCB_project.sh /YourHomeFolder/YourUserName/YourDocumentsFolder/YourProjectFolder/KiCad/YourProjectName (without file extension)
+# ./manage_PCB_project.sh YourDocumentsFolder/YourProjectsFolder/KiCad/YourProjectName (without file extension)
 # ---------------------------------------------------------
 # KiCad general workflow : Schematic ⟶ Printed Circuit Board (PCB) ⟶ Exports for fabrication
-# Schematic workflow : Electrical Rule Check (ERC) ⟶ export Bill Of Materials (BOM), print schematic in PDF
-# PCB workflow : Design Rule Check (DRC) ⟶ export board to Step, print PCB in PDF
+# Schematic workflow : Electrical Rule Check (ERC) ⟶ export Bill Of Materials (BOM), print schematic in a PDF file
+# PCB workflow : Design Rule Check (DRC) ⟶ export board to a Step file, print PCB in a PDF file
 # ---------------------------------------------------------
 # Check Bash script (strict mode)
 set -euo pipefail
@@ -144,8 +144,9 @@ if [[ -n "$project_name" && -d "$absolute_path" ]]; then
     # Schematic workflow :
     project_file="${project_name}.kicad_sch"    
     # Check the ERC
-    with_absolute_path="${CLI_SCH_ERC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
-    check_schematic_pcb "${with_absolute_path} ${project_file}" "${CLI_SCH_ERC_REPORT_URI}" "erc_pass" "erc_failed"
+    with_absolute_path="${CLI_SCH_ERC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}" # Replace strings with the correct path
+    with_absolute_path_report="${CLI_SCH_ERC_REPORT_URI/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    check_schematic_pcb "${with_absolute_path} ${project_file}" "${with_absolute_path_report}" "erc_pass" "erc_failed"
     # Export the BOM to a CSV file
     with_absolute_path="${CLI_SCH_BOM/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
     export_files "${with_absolute_path} ${project_file}" "bom_pass" "bom_failed"
@@ -156,7 +157,8 @@ if [[ -n "$project_name" && -d "$absolute_path" ]]; then
     project_file="${project_name}.kicad_pcb"
     # Check the DRC
     with_absolute_path="${CLI_PCB_DRC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
-    check_schematic_pcb "${with_absolute_path} ${project_file}" "${CLI_PCB_DRC_REPORT_URI}" "drc_pass" "drc_failed"
+    with_absolute_path_report="${CLI_PCB_DRC_REPORT_URI/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    check_schematic_pcb "${with_absolute_path} ${project_file}" "${with_absolute_path_report}" "drc_pass" "drc_failed"
     # Export the board to a 3D step file
     with_absolute_path="${CLI_PCB_STEP/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
     export_files "${with_absolute_path} ${project_file}" "step_pass" "step_failed"
