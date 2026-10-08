@@ -41,6 +41,8 @@ MSG_FR[drc_pass]="Aucune erreur pour les tests DRC"
 MSG_FR[drc_failed]="Erreur : les tests DRC ont échoué !"
 MSG_FR[step_pass]="Fichier 3D step créé avec succès"
 MSG_FR[step_failed]="Erreur : Lors de la création du fichier 3D step !"
+MSG_FR[render_pass]="Fichier 3D raytracé créé avec succès"
+MSG_FR[render_failed]="Erreur : Lors de la création du fichier 3D raytracé !"
 # English messages
 MSG_EN[usage]="./manage_PCB_project.sh <project_name_with_URI>"
 MSG_EN[err_no_name]="Error : No project name provided ! Usage :"
@@ -55,6 +57,8 @@ MSG_EN[drc_pass]="No error during DRC tests"
 MSG_EN[drc_failed]="Error : DRC tests has failed !"
 MSG_EN[step_pass]="3D step file created successfully"
 MSG_EN[step_failed]="Error : During created 3D step file !"
+MSG_EN[render_pass]="3D raytracing file created successfully"
+MSG_EN[render_failed]="Error : During created 3D raytracing file !"
 # Translation helper
 trans() {
     key="$1" # Message parameter
@@ -91,6 +95,9 @@ CLI_PCB_STEP="kicad-cli pcb export step --output ${CLI_PCB_STEP_FILE_URI} --no-d
 CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/pcb.pdf"
 CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI} --layers F.Cu,F.Silkscreen,F.Courtyard,Edge.Cuts,User.Drawings \
             --include-border-title --black-and-white"
+CLI_PCB_RENDER_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/render.png"
+CLI_PCB_RENDER="kicad-cli pcb render --output ${CLI_PCB_RENDER_URI} --width 1600 --height 1200 --side top --background opaque --quality basic \
+            --perspective --rotate '-15,-30,0'"
 # ---------------------------------------------------------
 # Global functions
 # ---------------------------------------------------------
@@ -129,6 +136,19 @@ export_files(){
         exit 1
     fi
 }
+
+render_pcb() {
+    local cli_render="$1"
+    local message_pass="$2"
+    local message_failed="$3"
+    if $cli_render; then
+        echo -e "${GREEN}$(trans $message_pass)${RESET}"
+    else
+        echo -e "${RED}$(trans $message_failed)${RESET}"
+        exit 1
+    fi
+}
+
 # ---------------------------------------------------------
 # Main actions, customize as needed !
 # ---------------------------------------------------------
@@ -165,4 +185,7 @@ if [[ -n "$project_name" && -d "$absolute_path" ]]; then
     # Export the PCB to a PDF file
     with_absolute_path="${CLI_PCB_PDF/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
     export_files "${with_absolute_path} ${project_file}" "pdf_pass" "pdf_failed"
+    # Generate a 3D raytraced rendering
+    with_absolute_path="${CLI_PCB_RENDER/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    render_pcb "${with_absolute_path} ${project_file}" "render_pass" "render_failed"
 fi
