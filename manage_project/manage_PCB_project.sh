@@ -79,7 +79,7 @@ RESET='\e[0m'
 # Export folder, adding date prefix in format: YYYY-mm-dd_s (Example: 2026-09-28_UnixTimeStamp_Export)
 DATE_PREFIX=$(date +%Y-%m-%d_%s)
 EXPORT_FOLDER="${DATE_PREFIX}_Export"
-EXPORT_FOLDER_ABSOLUTE="__VAR-TO-CHANGE__"
+EXPORT_FOLDER_ABSOLUTE="__ABSOLUTE__"
 # KiCad CLI schematic commands
 CLI_SCH_ERC_REPORT_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/erc-report.rpt"
 CLI_SCH_ERC="kicad-cli sch erc --output ${CLI_SCH_ERC_REPORT_URI} --severity-error --exit-code-violations"
@@ -94,10 +94,11 @@ CLI_PCB_STEP_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/3d-model.step"
 CLI_PCB_STEP="kicad-cli pcb export step --output ${CLI_PCB_STEP_FILE_URI} --no-dnp"
 CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/pcb.pdf"
 CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI} --layers F.Cu,F.Silkscreen,F.Courtyard,Edge.Cuts,User.Drawings \
-            --include-border-title --black-and-white"
+--include-border-title --black-and-white"
+CLI_PCB_RENDER_QUALITY="__QUALITY__"
 CLI_PCB_RENDER_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/render.png"
-CLI_PCB_RENDER="kicad-cli pcb render --output ${CLI_PCB_RENDER_URI} --width 1600 --height 1200 --side top --background opaque --quality basic \
-            --perspective --rotate '-15,-30,0'"
+CLI_PCB_RENDER="kicad-cli pcb render --output ${CLI_PCB_RENDER_URI} --width 1600 --height 1200 --side top --background opaque \
+--quality ${CLI_PCB_RENDER_QUALITY} --perspective --rotate '-15,-30,0'"
 # ---------------------------------------------------------
 # Global functions
 # ---------------------------------------------------------
@@ -141,7 +142,10 @@ render_pcb() {
     local cli_render="$1"
     local message_pass="$2"
     local message_failed="$3"
-    if $cli_render; then
+    local quality="${4:-}" # Quality parameter : basic or high
+    # Replace the quality variable in the original CLI command
+    cli_render_final="${cli_render/$CLI_PCB_RENDER_QUALITY/$quality}"
+    if $cli_render_final; then
         echo -e "${GREEN}$(trans $message_pass)${RESET}"
     else
         echo -e "${RED}$(trans $message_failed)${RESET}"
@@ -187,5 +191,5 @@ if [[ -n "$project_name" && -d "$absolute_path" ]]; then
     export_files "${with_absolute_path} ${project_file}" "pdf_pass" "pdf_failed"
     # Generate a 3D raytraced rendering
     with_absolute_path="${CLI_PCB_RENDER/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
-    render_pcb "${with_absolute_path} ${project_file}" "render_pass" "render_failed"
+    render_pcb "${with_absolute_path} ${project_file}" "render_pass" "render_failed" "basic"
 fi
