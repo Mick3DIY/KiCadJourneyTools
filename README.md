@@ -40,6 +40,10 @@ More informations : https://docs.kicad.org/master/en/eeschema/eeschema.html#vari
 - [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
 - [ ] [code] Add more scripts and codes, any ideas ? :laughing:
 
+## Projects using KiCad :
+
+* https://passionelectronique.fr with many tutorials from Jérôme Tomski [FR] :ok_hand:
+
 ## Documentation :
 
 KiCad :
@@ -57,7 +61,6 @@ KiCad books :
 * Elektor Ebooks bundle "KiCad Like a Pro" : https://www.elektor.fr/products/kicad-like-a-pro-e-book-bundle from [Peter Dalmaris](https://github.com/futureshocked) :ok_hand:
 
 Bash script :
-* https://www.gnu.org/software/bash/
 * https://www.gnu.org/software/bash/manual/
 * https://linuxcommand.org from William Shotts :penguin: :pray:
 * https://github.com/bobbyiliev/introduction-to-bash-scripting :ok_hand:
