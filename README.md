@@ -54,6 +54,13 @@ KiCad :
 KiCad Command Line Interface (CLI) :
 * https://docs.kicad.org/master/en/cli/cli.html
 
+KiCad useful plugins :
+* Interactive HTML BOM : https://github.com/openscopeproject/InteractiveHtmlBom
+* Board2Pdf : https://gitlab.com/dennevi/Board2Pdf
+* KiKit PCB panelization : https://github.com/yaqwsx/KiKit
+* PcbDraw convert PCB into 2D drawing : https://github.com/yaqwsx/PcbDraw
+* Solarized Dark theme : https://github.com/pointhi/kicad-color-schemes
+
 KiCad manufacturers support repositories :
 * https://github.com/AislerHQ/aisler-support
 
