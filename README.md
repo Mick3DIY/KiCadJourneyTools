@@ -37,6 +37,7 @@ More informations : https://docs.kicad.org/master/en/eeschema/eeschema.html#vari
 ## TODO :
 
 - [x] [code] Add script for managing KiCad project with a normal workflow : schematic, PCB...
+- [ ] [code] Add script for creating custom design rules (.kicad_dru), step by step
 - [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
 - [ ] [code] Add more scripts and codes, any ideas ? :laughing:
 
@@ -53,6 +54,9 @@ KiCad :
 
 KiCad Command Line Interface (CLI) :
 * https://docs.kicad.org/master/en/cli/cli.html
+
+KiCad Custom Design Rules (DRC) :
+* https://docs.kicad.org/master/en/pcbnew/pcbnew.html#custom-design-rules
 
 KiCad useful plugins :
 * Interactive HTML BOM : https://github.com/openscopeproject/InteractiveHtmlBom
