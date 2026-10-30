@@ -6,10 +6,10 @@
 
 A simple repository with scripts, codes and tips that I'm using every day, to wish you a pleasant journey with KiCad, for your studies or hobbies.
 
-## Code :
+## Codes :
 
-* For new project, Bash scripts : [new_project](new_project/) folder
-* To manage project, Bash scripts : [manage_project](manage_project/) folder
+* For new project, Bash script : [new_project](new_project/) folder
+* To manage project, Bash script : [manage_project](manage_project/) folder
 
 ## Text variables :
 
