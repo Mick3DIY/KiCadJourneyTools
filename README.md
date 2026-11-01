@@ -34,8 +34,15 @@ Otherwise if you have these text variables in one of your project, you can impor
 
 More informations : https://docs.kicad.org/master/en/eeschema/eeschema.html#variant-text-variables
 
+## Printed Circuit Board (PCB) :
+
+If you want a quick and affordable manufacturer for your next electronic project, get a unique 10€ coupon code in <ins>your first order</ins> in [AISLER](https://aisler.net) with my referral code : `MakeInEurope-ECYPW` :heart:
+
+Big thanks to [AISLER](https://aisler.net) PCB manufacturer :eu:
+
 ## TODO :
 
+- [x] [code] Add script for creating new KiCad project folders, files
 - [x] [code] Add script for managing KiCad project with a normal workflow : schematic, PCB...
 - [ ] [code] Add script for creating custom design rules (.kicad_dru), step by step
 - [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
@@ -61,8 +68,8 @@ KiCad Custom Design Rules (DRC) :
 KiCad useful plugins :
 * Interactive HTML BOM : https://github.com/openscopeproject/InteractiveHtmlBom
 * Board2Pdf : https://gitlab.com/dennevi/Board2Pdf
-* KiKit PCB panelization : https://github.com/yaqwsx/KiKit
-* PcbDraw convert PCB into 2D drawing : https://github.com/yaqwsx/PcbDraw
+* KiKit PCB panelization : https://github.com/yaqwsx/KiKit :thumbsup:
+* PcbDraw convert PCB into 2D drawing : https://github.com/yaqwsx/PcbDraw :thumbsup:
 * Solarized Dark theme : https://github.com/pointhi/kicad-color-schemes
 
 KiCad manufacturers support repositories :

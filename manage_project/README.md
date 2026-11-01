@@ -1,1 +1,199 @@
-https://github.com/Mick3DIY/KiCadJourneyTools/blob/491a5f76d2aff54e5edee14df1f3a870e549202e/manage_project/manage_PCB_project.sh
+## Code :
+
+```bash
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Automated managment, tests for a KiCad PCB project (FR/EN)
+# GitHub project : https://github.com/Mick3DIY/KiCadJourneyTools
+# -----------------------------------------------------------------------------
+# Usage :
+# - with your default language : ./manage_PCB_project.sh <path_to_your_project_name_with_complete_URI>
+# - with a particular language : LANG=en ./manage_PCB_project.sh <path_to_your_project_name_with_complete_URI>
+# Example :
+# ./manage_PCB_project.sh YourDocumentsFolder/YourProjectsFolder/KiCad/YourProjectName (without file extension)
+# ---------------------------------------------------------
+# KiCad general workflow : Schematic ⟶ Printed Circuit Board (PCB) ⟶ Exports for fabrication
+# Schematic workflow : Electrical Rule Check (ERC) ⟶ export Bill Of Materials (BOM), print schematic in a PDF file
+# PCB workflow : Design Rule Check (DRC) ⟶ export board to a Step file, print PCB in a PDF file
+# ---------------------------------------------------------
+# Check Bash script (strict mode)
+set -euo pipefail
+# ---------------------------------------------------------
+# Language detection, translations
+# ---------------------------------------------------------
+# Default language is 'en' if not 'fr'
+LANG_CODE="${LANG:-en}"
+if [[ "$LANG_CODE" =~ ^fr ]]; then
+    USER_LANG="fr"
+else
+	USER_LANG="en"
+fi
+# Default messages array, feel free to add your own language ^^
+declare -A MSG_FR MSG_EN
+# French messages
+MSG_FR[usage]="./manage_PCB_project.sh <nom_projet_avec_URI>"
+MSG_FR[err_no_name]="Erreur : Aucun nom de projet fourni ! Usage :"
+MSG_FR[created_dir]="Dossier créé : %s"
+MSG_FR[erc_pass]="Aucune erreur pour les tests ERC"
+MSG_FR[erc_failed]="Erreur : les tests ERC ont échoué !"
+MSG_FR[bom_pass]="Fichier BOM créé avec succès"
+MSG_FR[bom_failed]="Erreur : Lors de la création du fichier BOM !"
+MSG_FR[pdf_pass]="Fichier PDF créé avec succès"
+MSG_FR[pdf_failed]="Erreur : Lors de la création du fichier PDF !"
+MSG_FR[drc_pass]="Aucune erreur pour les tests DRC"
+MSG_FR[drc_failed]="Erreur : les tests DRC ont échoué !"
+MSG_FR[step_pass]="Fichier 3D step créé avec succès"
+MSG_FR[step_failed]="Erreur : Lors de la création du fichier 3D step !"
+MSG_FR[render_pass]="Fichier 3D raytracé créé avec succès"
+MSG_FR[render_failed]="Erreur : Lors de la création du fichier 3D raytracé !"
+# English messages
+MSG_EN[usage]="./manage_PCB_project.sh <project_name_with_URI>"
+MSG_EN[err_no_name]="Error : No project name provided ! Usage :"
+MSG_EN[created_dir]="Directory created : %s"
+MSG_EN[erc_pass]="No error during ERC tests"
+MSG_EN[erc_failed]="Error : ERC tests has failed !"
+MSG_EN[bom_pass]="BOM file created successfully"
+MSG_EN[bom_failed]="Error : During created BOM file !"
+MSG_EN[pdf_pass]="PDF file created successfully"
+MSG_EN[pdf_failed]="Error : During created PDF file !"
+MSG_EN[drc_pass]="No error during DRC tests"
+MSG_EN[drc_failed]="Error : DRC tests has failed !"
+MSG_EN[step_pass]="3D step file created successfully"
+MSG_EN[step_failed]="Error : During created 3D step file !"
+MSG_EN[render_pass]="3D raytracing file created successfully"
+MSG_EN[render_failed]="Error : During created 3D raytracing file !"
+# Translation helper
+trans() {
+    key="$1" # Message parameter
+    shift
+    if [[ "$USER_LANG" == "fr" ]]; then
+        printf "${MSG_FR[$key]}" "$@"
+    else
+        printf "${MSG_EN[$key]}" "$@"
+    fi
+}
+# ---------------------------------------------------------
+# Global constants
+# ---------------------------------------------------------
+# ANSI colors for messages : https://en.wikipedia.org/wiki/ANSI_escape_code
+GREEN='\e[32m'
+RED='\e[0;31m'
+RESET='\e[0m'
+# Export folder, adding date prefix in format: YYYY-mm-dd_s (Example: 2026-09-28_UnixTimeStamp_Export)
+DATE_PREFIX=$(date +%Y-%m-%d_%s)
+EXPORT_FOLDER="${DATE_PREFIX}_Export"
+EXPORT_FOLDER_ABSOLUTE="__ABSOLUTE__"
+# KiCad CLI schematic commands
+CLI_SCH_ERC_REPORT_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/erc-report.rpt"
+CLI_SCH_ERC="kicad-cli sch erc --output ${CLI_SCH_ERC_REPORT_URI} --severity-error --exit-code-violations"
+CLI_SCH_BOM_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/bom.csv"
+CLI_SCH_BOM="kicad-cli sch export bom --output ${CLI_SCH_BOM_FILE_URI} --exclude-dnp --group-by "Value,Footprint""
+CLI_SCH_PDF_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/schematic.pdf"
+CLI_SCH_PDF="kicad-cli sch export pdf --output ${CLI_SCH_PDF_FILE_URI}"
+# KiCad CLI PCB commands
+CLI_PCB_DRC_REPORT_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/drc-report.rpt"
+CLI_PCB_DRC="kicad-cli pcb drc --output ${CLI_PCB_DRC_REPORT_URI} --schematic-parity --severity-all --exit-code-violations"
+CLI_PCB_STEP_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/3d-model.step"
+CLI_PCB_STEP="kicad-cli pcb export step --output ${CLI_PCB_STEP_FILE_URI} --no-dnp"
+CLI_PCB_PDF_FILE_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/pcb.pdf"
+CLI_PCB_PDF="kicad-cli pcb export pdf --output ${CLI_PCB_PDF_FILE_URI} --layers F.Cu,F.Silkscreen,F.Courtyard,Edge.Cuts,User.Drawings \
+--include-border-title --black-and-white"
+CLI_PCB_RENDER_QUALITY="__QUALITY__"
+CLI_PCB_RENDER_URI="${EXPORT_FOLDER_ABSOLUTE}/${EXPORT_FOLDER}/render.png"
+CLI_PCB_RENDER="kicad-cli pcb render --output ${CLI_PCB_RENDER_URI} --width 1600 --height 1200 --side top --background opaque \
+--quality ${CLI_PCB_RENDER_QUALITY} --perspective --rotate '-15,-30,0'"
+# ---------------------------------------------------------
+# Global functions
+# ---------------------------------------------------------
+get_project_name() {
+    local project_name="${1:-}"
+    if [[ -z "$project_name" ]]; then
+        echo -e "${RED}$(trans err_no_name) $(trans usage)${RESET}" >&2; exit 1;
+    fi
+    echo "${project_name// /_}" # Return value for the CLI commands
+}
+
+check_schematic_pcb() {
+    local cli_check="$1"
+    local uri_file="$2"
+    local message_pass="$3"
+    local message_failed="$4"
+    if $cli_check; then
+        echo -e "${GREEN}$(trans $message_pass)${RESET}"
+    else
+        echo -e "${RED}$(trans $message_failed)${RESET}"
+        if [ -f "$uri_file" ]; then
+            cat "${uri_file}" # Show the report file
+        fi
+        exit 1
+    fi
+}
+
+export_files(){
+    local cli_export="$1"
+    local message_pass="$2"
+    local message_failed="$3"
+    if $cli_export; then
+        echo -e "${GREEN}$(trans $message_pass)${RESET}"
+    else
+        echo -e "${RED}$(trans $message_failed)${RESET}"
+        exit 1
+    fi
+}
+
+render_pcb() {
+    local cli_render="$1"
+    local message_pass="$2"
+    local message_failed="$3"
+    local quality="${4:-}" # Quality parameter : basic or high
+    # Replace the quality variable in the original CLI command
+    cli_render_final="${cli_render/$CLI_PCB_RENDER_QUALITY/$quality}"
+    if $cli_render_final; then
+        echo -e "${GREEN}$(trans $message_pass)${RESET}"
+    else
+        echo -e "${RED}$(trans $message_failed)${RESET}"
+        exit 1
+    fi
+}
+
+# ---------------------------------------------------------
+# Main actions, customize as needed !
+# ---------------------------------------------------------
+clear
+project_name="$(get_project_name "${1:-}")"
+# Absolute path to the project name
+absolute_path="$(dirname $(realpath $project_name))"
+if [[ -n "$project_name" && -d "$absolute_path" ]]; then
+    # Report folder to receive all files
+    report_dir="$absolute_path/${EXPORT_FOLDER}"
+    mkdir -p "$report_dir"
+    echo -e "${GREEN}$(trans created_dir "$report_dir")${RESET}"
+    # Schematic workflow :
+    project_file="${project_name}.kicad_sch"    
+    # Check the ERC
+    with_absolute_path="${CLI_SCH_ERC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}" # Replace strings with the correct path
+    with_absolute_path_report="${CLI_SCH_ERC_REPORT_URI/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    check_schematic_pcb "${with_absolute_path} ${project_file}" "${with_absolute_path_report}" "erc_pass" "erc_failed"
+    # Export the BOM to a CSV file
+    with_absolute_path="${CLI_SCH_BOM/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "bom_pass" "bom_failed"
+    # Export the schematic to a PDF file
+    with_absolute_path="${CLI_SCH_PDF/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "pdf_pass" "pdf_failed"
+    # PCB  workflow :
+    project_file="${project_name}.kicad_pcb"
+    # Check the DRC
+    with_absolute_path="${CLI_PCB_DRC/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    with_absolute_path_report="${CLI_PCB_DRC_REPORT_URI/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    check_schematic_pcb "${with_absolute_path} ${project_file}" "${with_absolute_path_report}" "drc_pass" "drc_failed"
+    # Export the board to a 3D step file
+    with_absolute_path="${CLI_PCB_STEP/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "step_pass" "step_failed"
+    # Export the PCB to a PDF file
+    with_absolute_path="${CLI_PCB_PDF/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    export_files "${with_absolute_path} ${project_file}" "pdf_pass" "pdf_failed"
+    # Generate a 3D raytraced rendering
+    with_absolute_path="${CLI_PCB_RENDER/$EXPORT_FOLDER_ABSOLUTE/$absolute_path}"
+    render_pcb "${with_absolute_path} ${project_file}" "render_pass" "render_failed" "basic"
+fi
+```
