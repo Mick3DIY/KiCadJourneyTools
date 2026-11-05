@@ -1,5 +1,10 @@
 ## Code :
 
+> [!TIP]
+> * KiCad general workflow : Schematic ⟶ Printed Circuit Board (PCB) ⟶ Exports for fabrication
+> * Schematic workflow : Electrical Rule Check (ERC) ⟶ export Bill Of Materials (BOM), schematic (print files)
+> * PCB workflow : Design Rule Check (DRC) ⟶ export board (Step, Gerber, print files)
+
 ```bash
 #!/bin/bash
 # -----------------------------------------------------------------------------

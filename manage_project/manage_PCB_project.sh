@@ -9,10 +9,6 @@
 # Example :
 # ./manage_PCB_project.sh YourDocumentsFolder/YourProjectsFolder/KiCad/YourProjectName (without file extension)
 # ---------------------------------------------------------
-# KiCad general workflow : Schematic ⟶ Printed Circuit Board (PCB) ⟶ Exports for fabrication
-# Schematic workflow : Electrical Rule Check (ERC) ⟶ export Bill Of Materials (BOM), print schematic in a PDF file
-# PCB workflow : Design Rule Check (DRC) ⟶ export board to a Step file, print PCB in a PDF file
-# ---------------------------------------------------------
 # Check Bash script (strict mode)
 set -euo pipefail
 # ---------------------------------------------------------

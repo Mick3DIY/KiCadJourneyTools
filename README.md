@@ -45,6 +45,7 @@ Big thanks to [AISLER](https://aisler.net) PCB manufacturer :eu:
 - [x] [code] Add script for creating new KiCad project folders, files
 - [x] [code] Add script for managing KiCad project with a normal workflow : schematic, PCB...
 - [ ] [code] Add script for creating custom design rules (.kicad_dru), step by step
+- [ ] [code] Add script for creating common jobsets file (all projects)
 - [ ] [code] Add a empty KiCad project files, version 9 or 10 ?
 - [ ] [code] Add more scripts and codes, any ideas ? :laughing:
 
@@ -59,11 +60,20 @@ KiCad :
 * https://docs.kicad.org
 * Plugins repository : https://www.kicad.org/pcm/
 
-KiCad Command Line Interface (CLI) :
-* https://docs.kicad.org/master/en/cli/cli.html
+KiCad Electrical Rule Check (ERC) ⟶ schematic workflow :
+* https://docs.kicad.org/master/en/eeschema/eeschema.html#erc
 
-KiCad Custom Design Rules (DRC) :
+KiCad Custom Design Rules (DRC) ⟶ PCB workflow :
 * https://docs.kicad.org/master/en/pcbnew/pcbnew.html#custom-design-rules
+
+KiCad Design Rule Check (DRC) ⟶ PCB workflow :
+* https://docs.kicad.org/master/en/pcbnew/pcbnew.html#design-rule-checking
+
+KiCad jobsets ⟶ project workflow :
+* https://docs.kicad.org/master/en/kicad/kicad.html#jobsets
+
+KiCad Command Line Interface (CLI) ⟶ project workflow :
+* https://docs.kicad.org/master/en/cli/cli.html
 
 KiCad useful plugins :
 * Interactive HTML BOM : https://github.com/openscopeproject/InteractiveHtmlBom
